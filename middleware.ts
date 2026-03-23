@@ -5,9 +5,10 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow auth API routes and static assets
+  // Allow auth API routes, debug route, and static assets
   if (
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/debug") ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico"
   ) {
@@ -18,6 +19,8 @@ export async function middleware(request: NextRequest) {
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
+
+  console.log("[MIDDLEWARE]", pathname, { hasToken: !!token, tokenEmail: token?.email });
 
   // If on login page and already authenticated, redirect to dashboard
   if (pathname === "/login" && token) {

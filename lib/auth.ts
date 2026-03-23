@@ -13,11 +13,32 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  session: {
+    strategy: "jwt",
+  },
+  debug: true,
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, account, profile }) {
+      console.log("[AUTH] signIn callback:", {
+        email: user.email,
+        provider: account?.provider,
+        allowed: ALLOWED_EMAILS.includes(user.email?.toLowerCase() ?? ""),
+      });
       return ALLOWED_EMAILS.includes(user.email?.toLowerCase() ?? "");
     },
-    async session({ session }) {
+    async jwt({ token, user, account }) {
+      console.log("[AUTH] jwt callback:", {
+        hasToken: !!token,
+        hasUser: !!user,
+        email: token?.email || user?.email,
+      });
+      return token;
+    },
+    async session({ session, token }) {
+      console.log("[AUTH] session callback:", {
+        email: session?.user?.email,
+        hasToken: !!token,
+      });
       return session;
     },
   },
