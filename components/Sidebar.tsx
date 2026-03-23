@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Users,
   Kanban,
   Filter,
   Tag,
+  LogOut,
 } from "lucide-react";
 
 const navItems = [
@@ -20,6 +22,9 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  if (pathname === "/login") return null;
 
   return (
     <aside className="w-60 bg-[#1a1a24] border-r border-slate-700 fixed left-0 h-screen flex flex-col">
@@ -48,6 +53,35 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {session?.user && (
+        <div className="p-4 border-t border-slate-700">
+          <div className="flex items-center gap-3 mb-3">
+            {session.user.image && (
+              <img
+                src={session.user.image}
+                alt=""
+                className="w-8 h-8 rounded-full"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-200 truncate">
+                {session.user.name}
+              </p>
+              <p className="text-xs text-slate-500 truncate">
+                {session.user.email}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-400 transition-colors w-full"
+          >
+            <LogOut size={14} />
+            Cerrar sesión
+          </button>
+        </div>
+      )}
 
       <div className="p-6 border-t border-slate-700">
         <p className="text-xs text-slate-500">Marimbas Home 2026</p>

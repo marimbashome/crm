@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "Marimbas CRM",
@@ -27,12 +28,14 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans">
-        <div className="flex h-screen bg-background text-foreground">
-          <Sidebar />
-          <main className="flex-1 overflow-auto ml-60">
-            <div className="p-8">{children}</div>
-          </main>
-        </div>
+        <AuthProvider>
+          <div className="flex h-screen bg-background text-foreground">
+            <Sidebar />
+            <main className="flex-1 overflow-auto ml-60">
+              <div className="p-8">{children}</div>
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
