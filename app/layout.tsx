@@ -16,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -31,8 +32,10 @@ export default function RootLayout({
         <AuthProvider>
           <div className="flex h-screen bg-background text-foreground">
             <Sidebar />
-            <main className="flex-1 overflow-auto ml-60">
-              <div className="p-8">{children}</div>
+            <main className="flex-1 overflow-auto lg:ml-64">
+              <div className="p-4 pt-16 sm:p-6 sm:pt-16 lg:p-8 lg:pt-8">
+                {children}
+              </div>
             </main>
           </div>
         </AuthProvider>

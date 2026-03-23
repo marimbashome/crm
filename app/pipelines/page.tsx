@@ -189,10 +189,10 @@ export default function PipelinesPage() {
   return (
     <div className="min-h-screen bg-[#0f0f1a] text-white">
       {/* Header */}
-      <div className="border-b border-[#2a2a3a] p-6">
+      <div className="border-b border-[#2a2a3a] p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Sales Pipelines</h1>
-          <p className="text-slate-400">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Sales Pipelines</h1>
+          <p className="text-slate-400 text-sm sm:text-base">
             Manage deals across multiple sales pipelines
           </p>
         </div>
@@ -200,8 +200,8 @@ export default function PipelinesPage() {
 
       {/* Pipeline Tabs */}
       <div className="border-b border-[#2a2a3a] sticky top-0 bg-[#0f0f1a] z-10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex gap-2 py-4 overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex gap-2 py-3 sm:py-4 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             {pipelineTypes.map((type) => (
               <button
                 key={type}
@@ -221,7 +221,7 @@ export default function PipelinesPage() {
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
           {/* Error State */}
           {error && (
@@ -246,7 +246,7 @@ export default function PipelinesPage() {
                   return (
                     <div
                       key={stage.id}
-                      className="flex-shrink-0 w-[280px] flex flex-col"
+                      className="flex-shrink-0 w-[260px] sm:w-[280px] flex flex-col"
                     >
                       {/* Column Header */}
                       <div

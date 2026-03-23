@@ -147,12 +147,12 @@ export default function ContactsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f1a] text-white p-6">
+    <div className="min-h-screen bg-[#0f0f1a] text-white">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Contacts</h1>
-          <p className="text-slate-400">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Contacts</h1>
+          <p className="text-slate-400 text-sm sm:text-base">
             Manage and track all your contacts
           </p>
         </div>
@@ -230,10 +230,38 @@ export default function ContactsPage() {
           </div>
         )}
 
-        {/* Table */}
+        {/* Contact List */}
         {!loading && !error && filteredContacts.length > 0 && (
           <>
-            <div className="overflow-x-auto">
+            {/* Mobile: Card layout */}
+            <div className="space-y-3 md:hidden">
+              {displayedContacts.map((contact) => (
+                <div
+                  key={contact.id}
+                  onClick={() => router.push(`/contacts/${contact.id}`)}
+                  className="p-4 rounded-lg bg-[#1a1a2e] border border-[#2a2a3a] hover:border-[#3a3a4a] cursor-pointer transition-colors active:bg-[#1f1f2d]"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="min-w-0">
+                      <p className="font-medium text-white truncate">
+                        {contact.first_name} {contact.last_name}
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">{contact.email}</p>
+                    </div>
+                    {getTierBadge(contact.guest_tier)}
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-slate-400">
+                    <span className="font-semibold text-yellow-400">{formatCurrency(contact.lifetime_value)}</span>
+                    <span>{contact.stays_count} stays</span>
+                    <span>{contact.source || '—'}</span>
+                    <span className="ml-auto">{formatDate(contact.last_seen)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: Table layout */}
+            <div className="overflow-x-auto hidden md:block">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[#2a2a3a]">
@@ -252,10 +280,10 @@ export default function ContactsPage() {
                     <th className="text-left py-3 px-4 text-slate-400 font-semibold text-sm">
                       Stays
                     </th>
-                    <th className="text-left py-3 px-4 text-slate-400 font-semibold text-sm">
+                    <th className="text-left py-3 px-4 text-slate-400 font-semibold text-sm hidden lg:table-cell">
                       Source
                     </th>
-                    <th className="text-left py-3 px-4 text-slate-400 font-semibold text-sm">
+                    <th className="text-left py-3 px-4 text-slate-400 font-semibold text-sm hidden lg:table-cell">
                       Last Seen
                     </th>
                   </tr>
@@ -275,7 +303,7 @@ export default function ContactsPage() {
                           {contact.contact_type}
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-slate-300 truncate">
+                      <td className="py-4 px-4 text-slate-300 truncate max-w-[200px]">
                         {contact.email}
                       </td>
                       <td className="py-4 px-4">
@@ -287,10 +315,10 @@ export default function ContactsPage() {
                       <td className="py-4 px-4 text-slate-300">
                         {contact.stays_count}
                       </td>
-                      <td className="py-4 px-4 text-slate-400 text-sm">
+                      <td className="py-4 px-4 text-slate-400 text-sm hidden lg:table-cell">
                         {contact.source || '—'}
                       </td>
-                      <td className="py-4 px-4 text-slate-400 text-sm">
+                      <td className="py-4 px-4 text-slate-400 text-sm hidden lg:table-cell">
                         {formatDate(contact.last_seen)}
                       </td>
                     </tr>

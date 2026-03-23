@@ -236,26 +236,26 @@ export default function ContactDetailPage() {
   return (
     <div className="min-h-screen bg-[#0f0f1a] text-white">
       {/* Navigation */}
-      <div className="px-6 py-4 border-b border-[#2a2a3a]">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-[#2a2a3a]">
         <button
           onClick={() => router.push('/contacts')}
-          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm sm:text-base"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
           Contacts
         </button>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-6xl mx-auto">
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Left Column (60%) */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Contact Header */}
-              <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-6">
-                <div className="mb-4">
-                  <h1 className="text-4xl font-bold mb-3">
+              <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-4 sm:p-6">
+                <div className="mb-3 sm:mb-4">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 break-words">
                     {contact.first_name} {contact.last_name}
                   </h1>
                   <div className="flex flex-wrap gap-3">
@@ -294,8 +294,8 @@ export default function ContactDetailPage() {
               </div>
 
               {/* Contact Info Grid */}
-              <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-6">
-                <h2 className="text-lg font-semibold mb-4">Contact Information</h2>
+              <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-4 sm:p-6">
+                <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact Information</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Email */}
                   <div className="flex items-start gap-3">
@@ -343,8 +343,8 @@ export default function ContactDetailPage() {
 
               {/* Guest-Specific Fields */}
               {guestFields && (
-                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-6">
-                  <h2 className="text-lg font-semibold mb-4">Guest Information</h2>
+                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-4 sm:p-6">
+                  <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Guest Information</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <p className="text-slate-400 text-sm mb-1">Lifetime Value</p>
@@ -406,8 +406,8 @@ export default function ContactDetailPage() {
 
               {/* Owner-Specific Fields */}
               {ownerFields && (
-                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-6">
-                  <h2 className="text-lg font-semibold mb-4">Owner Information</h2>
+                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-4 sm:p-6">
+                  <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Owner Information</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {contact.properties_count !== undefined && (
                       <div>
@@ -465,10 +465,10 @@ export default function ContactDetailPage() {
             </div>
 
             {/* Right Column (40%) */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Activity Timeline */}
               {interactions.length > 0 && (
-                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-6">
+                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-4 sm:p-6">
                   <h2 className="text-lg font-semibold mb-4">Activity Timeline</h2>
                   <div className="space-y-3 max-h-96 overflow-y-auto">
                     {displayedInteractions.map((interaction) => {
@@ -506,7 +506,7 @@ export default function ContactDetailPage() {
 
               {/* Notes Section */}
               {notes.length > 0 && (
-                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-6">
+                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-4 sm:p-6">
                   <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <StickyNote size={20} className="text-[#C9A96E]" />
                     Notes
@@ -534,7 +534,7 @@ export default function ContactDetailPage() {
 
               {/* Tasks Section */}
               {tasks.length > 0 && (
-                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-6">
+                <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-xl p-4 sm:p-6">
                   <h2 className="text-lg font-semibold mb-4">Tasks</h2>
                   <div className="space-y-2">
                     {tasks.map((task) => (

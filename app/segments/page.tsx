@@ -153,32 +153,32 @@ export default function SegmentsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-foreground">Segments</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Segments</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             {segments.length} segmentos · {totalContacts.toLocaleString()} contactos totales
             {loading && " · Cargando..."}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {(["all", "automatic", "manual"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 filter === f
                   ? "bg-[#C9A96E] text-black"
                   : "bg-slate-800 text-slate-300 hover:bg-slate-700"
               }`}
             >
-              {f === "all" ? "Todos" : f === "automatic" ? "Automáticos" : "Manuales"}
+              {f === "all" ? "Todos" : f === "automatic" ? "Auto" : "Manual"}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filtered.map((segment) => {
           const pct = totalContacts > 0 ? ((segment.count / totalContacts) * 100).toFixed(1) : "0";
           return (

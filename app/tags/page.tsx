@@ -128,17 +128,17 @@ export default function TagsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-foreground">Tags</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Tags</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             {tags.length} tags · Organiza y clasifica contactos
             {loading && " · Cargando..."}
           </p>
         </div>
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#C9A96E] text-black rounded-lg font-medium hover:bg-[#B8984D] transition"
+          className="flex items-center gap-2 px-4 py-2 bg-[#C9A96E] text-black rounded-lg font-medium hover:bg-[#B8984D] transition self-start sm:self-auto"
         >
           <Plus size={16} />
           Nuevo Tag

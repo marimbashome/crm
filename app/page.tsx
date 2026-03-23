@@ -86,31 +86,31 @@ export default async function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-4xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Vista general del CRM — datos en tiempo real</p>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">Vista general del CRM — datos en tiempo real</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-slate-600 transition"
+            className="bg-slate-800 rounded-lg p-3 sm:p-4 lg:p-6 border border-slate-700 hover:border-slate-600 transition"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-400 text-sm font-medium mb-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-slate-400 text-xs sm:text-sm font-medium mb-1 sm:mb-2 truncate">
                   {kpi.label}
                 </p>
-                <p className="text-3xl font-bold text-[#C9A96E]">{kpi.value}</p>
+                <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#C9A96E] truncate">{kpi.value}</p>
               </div>
-              <div className="text-4xl opacity-50">{kpi.icon}</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl opacity-50 flex-shrink-0 hidden sm:block">{kpi.icon}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-        <h2 className="text-xl font-bold text-foreground mb-4">
+      <div className="bg-slate-800 rounded-lg p-4 sm:p-6 border border-slate-700">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4">
           Actividad Reciente
         </h2>
         {data.recentActivity.length === 0 ? (
