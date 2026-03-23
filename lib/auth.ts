@@ -1,11 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-const ALLOWED_EMAILS = [
-  "enrique@marimbashome.com",
-  "zayde@marimbashome.com",
-];
-
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -18,26 +13,20 @@ export const authOptions: NextAuthOptions = {
   },
   debug: true,
   callbacks: {
-    async signIn({ user }) {
-      console.log("[AUTH] signIn callback:", {
-        email: user.email,
-        allowed: ALLOWED_EMAILS.includes(user.email?.toLowerCase() ?? ""),
-      });
-      return ALLOWED_EMAILS.includes(user.email?.toLowerCase() ?? "");
+    async signIn() {
+      // TEMP: allow ALL Google accounts to debug
+      return true;
     },
     async jwt({ token, user }) {
-      console.log("[AUTH] jwt callback:", {
-        hasToken: !!token,
-        hasUser: !!user,
-        email: token?.email || user?.email,
-      });
+      if (user) {
+        token.email = user.email;
+      }
       return token;
     },
     async session({ session, token }) {
-      console.log("[AUTH] session callback:", {
-        email: session?.user?.email,
-        hasToken: !!token,
-      });
+      if (session.user && token.email) {
+        session.user.email = token.email as string;
+      }
       return session;
     },
   },
