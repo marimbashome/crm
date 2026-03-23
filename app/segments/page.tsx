@@ -121,7 +121,6 @@ export default function SegmentsPage() {
       ]);
 
       // For CDMX/Chiapas we derive from total minus others
-      const knownCount = (vip || 0) + (frequent || 0) + (standard || 0);
       const cdmxEstimate = Math.round((total || 0) * 0.146); // ~14.6% based on Condesa 4 props / 22 total
       const chiapasEstimate = (total || 0) - cdmxEstimate;
 
