@@ -18,15 +18,14 @@ export const authOptions: NextAuthOptions = {
   },
   debug: true,
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user }) {
       console.log("[AUTH] signIn callback:", {
         email: user.email,
-        provider: account?.provider,
         allowed: ALLOWED_EMAILS.includes(user.email?.toLowerCase() ?? ""),
       });
       return ALLOWED_EMAILS.includes(user.email?.toLowerCase() ?? "");
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       console.log("[AUTH] jwt callback:", {
         hasToken: !!token,
         hasUser: !!user,
