@@ -1,17 +1,10 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install",
-  "regions": ["iad1"],
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
-      "source": "/:path*",
-      "destination": "https://ops.marimbashome.com/crm/:path*",
-      "permanent": false
+      "source": "/(.*)",
+      "destination": "https://ops.marimbashome.com/crm/$1",
+      "permanent": true
     }
-  ],
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "https://xqjjdopwinljrnxexpwd.supabase.co"
-  }
+  ]
 }
