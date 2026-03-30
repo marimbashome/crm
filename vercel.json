@@ -4,6 +4,13 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "regions": ["iad1"],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://ops.marimbashome.com/crm/:path*",
+      "permanent": false
+    }
+  ],
   "env": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://xqjjdopwinljrnxexpwd.supabase.co"
   }
