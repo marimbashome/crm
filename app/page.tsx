@@ -1,6 +1,6 @@
 import { createClient } from '../lib/supabase';
 
-export const revalidate = 60; // revalidate every 60 seconds
+export const dynamic = 'force-dynamic'; // fetch fresh data on every request, no ISR writes
 
 async function getDashboardData() {
   const supabase = createClient();
