@@ -12,7 +12,7 @@ name: Vercel deploy ERROR → Slack
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 permissions:
   contents: read
