@@ -16,6 +16,7 @@ import {
   Circle,
   StickyNote,
 } from 'lucide-react'
+import { AirbnbHistoryBadge, type AirbnbHistoryData } from '@/components/AirbnbHistoryBadge'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -107,6 +108,7 @@ export default function ContactDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showMoreInteractions, setShowMoreInteractions] = useState(false)
+  const [airbnbHistory, setAirbnbHistory] = useState<AirbnbHistoryData | null>(null)
 
   useEffect(() => {
     const fetchContactDetails = async () => {
@@ -154,6 +156,17 @@ export default function ContactDetailPage() {
           .order('due_date', { ascending: true })
 
         setTasks(tasksData || [])
+
+        // Fetch Airbnb history via service-role API route (non-blocking)
+        try {
+          const res = await fetch(`/api/airbnb-history?contact_id=${contactId}`)
+          if (res.ok) {
+            const hist = await res.json()
+            setAirbnbHistory(hist)
+          }
+        } catch {
+          // Airbnb history is non-critical — fail silently
+        }
       } catch (err) {
         console.error('Error fetching contact details:', err)
         setError('An unexpected error occurred')
@@ -258,7 +271,7 @@ export default function ContactDetailPage() {
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 break-words">
                     {contact.first_name} {contact.last_name}
                   </h1>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 items-center">
                     {contact.guest_tier && (
                       <span
                         className={`inline-block px-3 py-1 rounded-lg text-sm font-medium ${
@@ -275,6 +288,9 @@ export default function ContactDetailPage() {
                     >
                       {contact.contact_type}
                     </span>
+                    {/* Airbnb history chip — renders only when guest has an airbnb_user_id
+                        matched in guest_airbnb_history. Null-safe: no chip if no match. */}
+                    <AirbnbHistoryBadge data={airbnbHistory} />
                   </div>
                 </div>
 
