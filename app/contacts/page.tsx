@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
@@ -8,6 +8,8 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
+
+const PAGE_SIZE = 50
 
 interface CrmContact {
   id: string
@@ -32,81 +34,100 @@ const tierColors: Record<string, string> = {
 export default function ContactsPage() {
   const router = useRouter()
   const [contacts, setContacts] = useState<CrmContact[]>([])
-  const [filteredContacts, setFilteredContacts] = useState<CrmContact[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [selectedType, setSelectedType] = useState<string>('All')
   const [selectedTier, setSelectedTier] = useState<string>('All')
-  const [displayCount, setDisplayCount] = useState(50)
+  const [page, setPage] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Fetch contacts on mount
+  // Debounce search input — reset page on new search
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(value)
+      setPage(0)
+    }, 350)
+  }
+
+  // Reset page when filters change
+  const handleTypeChange = (type: string) => {
+    setSelectedType(type)
+    setPage(0)
+  }
+
+  const handleTierChange = (tier: string) => {
+    setSelectedTier(tier)
+    setPage(0)
+  }
+
+  // Fetch one page of contacts from Supabase with server-side filtering
   useEffect(() => {
     const fetchContacts = async () => {
       try {
         setLoading(true)
         setError(null)
 
-        // NOTE: RLS is enabled on crm_contacts table. Using anon key with NEXT_PUBLIC_SUPABASE_ANON_KEY
-        // will only return data if RLS policies allow public access. For production, either:
-        // 1. Replace with service_role key (server-side only)
-        // 2. Implement proper auth flow with authenticated user
-        // 3. Create RLS policy that allows anon access to specific columns/rows
-        
-        const { data, error: fetchError } = await supabase
+        const from = page * PAGE_SIZE
+        const to = from + PAGE_SIZE - 1
+
+        let query = supabase
           .from('crm_contacts')
-          .select('*')
+          .select(
+            'id,first_name,last_name,email,contact_type,guest_tier,lifetime_value,stays_count,source,last_seen',
+            { count: 'exact' }
+          )
           .order('lifetime_value', { ascending: false })
+          .range(from, to)
+
+        // Server-side type filter
+        if (selectedType !== 'All') {
+          query = query.eq('contact_type', selectedType)
+        }
+
+        // Server-side tier filter
+        if (selectedTier !== 'All') {
+          query = query.eq('guest_tier', selectedTier)
+        }
+
+        // Server-side search (ilike on name / email)
+        if (debouncedSearch.trim()) {
+          const term = `%${debouncedSearch.trim()}%`
+          query = query.or(
+            `first_name.ilike.${term},last_name.ilike.${term},email.ilike.${term}`
+          )
+        }
+
+        const { data, error: fetchError, count } = await query
 
         if (fetchError) {
           console.error('Supabase error:', fetchError)
           setError(`Failed to load contacts: ${fetchError.message}`)
           setContacts([])
+          setTotalCount(0)
         } else {
           setContacts(data || [])
+          setTotalCount(count ?? 0)
         }
       } catch (err) {
         console.error('Error fetching contacts:', err)
         setError('An unexpected error occurred')
         setContacts([])
+        setTotalCount(0)
       } finally {
         setLoading(false)
       }
     }
 
     fetchContacts()
-  }, [])
+  }, [page, selectedType, selectedTier, debouncedSearch])
 
-  // Apply filters and search
-  useEffect(() => {
-    let result = contacts
-
-    // Type filter
-    if (selectedType !== 'All') {
-      result = result.filter((c) => c.contact_type === selectedType)
-    }
-
-    // Tier filter
-    if (selectedTier !== 'All') {
-      result = result.filter((c) => c.guest_tier === selectedTier)
-    }
-
-    // Search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (c) =>
-          c.first_name.toLowerCase().includes(query) ||
-          c.last_name.toLowerCase().includes(query) ||
-          c.email.toLowerCase().includes(query)
-      )
-    }
-
-    setFilteredContacts(result)
-  }, [contacts, selectedType, selectedTier, searchQuery])
-
-  const displayedContacts = filteredContacts.slice(0, displayCount)
-  const hasMore = displayCount < filteredContacts.length
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+  const displayedContacts = contacts
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-MX', {
@@ -163,7 +184,7 @@ export default function ContactsPage() {
             type="text"
             placeholder="Search by name or email..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full px-4 py-2 rounded-lg bg-[#1a1a2e] border border-[#2a2a3a] text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 transition-colors"
           />
         </div>
@@ -175,7 +196,7 @@ export default function ContactsPage() {
             {['All', 'Guests', 'Leads', 'Owners', 'B2B'].map((type) => (
               <button
                 key={type}
-                onClick={() => setSelectedType(type === 'All' ? 'All' : type.slice(0, -1))}
+                onClick={() => handleTypeChange(type === 'All' ? 'All' : type.slice(0, -1))}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   selectedType === (type === 'All' ? 'All' : type.slice(0, -1))
                     ? 'bg-yellow-500/30 text-yellow-200 border border-yellow-500/50'
@@ -192,7 +213,7 @@ export default function ContactsPage() {
             {['All', 'VIP', 'Frequent', 'Standard', 'At-Risk'].map((tier) => (
               <button
                 key={tier}
-                onClick={() => setSelectedTier(tier)}
+                onClick={() => handleTierChange(tier)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   selectedTier === tier
                     ? 'bg-yellow-500/30 text-yellow-200 border border-yellow-500/50'
@@ -220,10 +241,10 @@ export default function ContactsPage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && filteredContacts.length === 0 && (
+        {!loading && !error && totalCount === 0 && (
           <div className="text-center py-12">
             <p className="text-slate-400">
-              {searchQuery || selectedType !== 'All' || selectedTier !== 'All'
+              {debouncedSearch || selectedType !== 'All' || selectedTier !== 'All'
                 ? 'No contacts match your filters'
                 : 'No contacts found'}
             </p>
@@ -231,7 +252,7 @@ export default function ContactsPage() {
         )}
 
         {/* Contact List */}
-        {!loading && !error && filteredContacts.length > 0 && (
+        {!loading && !error && totalCount > 0 && (
           <>
             {/* Mobile: Card layout */}
             <div className="space-y-3 md:hidden">
@@ -327,21 +348,32 @@ export default function ContactsPage() {
               </table>
             </div>
 
-            {/* Load More Button */}
-            {hasMore && (
-              <div className="flex justify-center mt-6">
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-6 gap-4">
                 <button
-                  onClick={() => setDisplayCount((prev) => prev + 50)}
-                  className="px-6 py-2 rounded-lg bg-yellow-500/20 text-yellow-200 border border-yellow-500/30 hover:bg-yellow-500/30 transition-colors font-medium"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="px-4 py-2 rounded-lg bg-[#1a1a2e] text-slate-300 border border-[#2a2a3a] hover:border-[#3a3a4a] disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium text-sm"
                 >
-                  Load More ({filteredContacts.length - displayCount} remaining)
+                  ← Previous
+                </button>
+                <span className="text-slate-400 text-sm">
+                  Page {page + 1} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="px-4 py-2 rounded-lg bg-[#1a1a2e] text-slate-300 border border-[#2a2a3a] hover:border-[#3a3a4a] disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium text-sm"
+                >
+                  Next →
                 </button>
               </div>
             )}
 
             {/* Results Summary */}
-            <div className="mt-6 text-slate-400 text-sm">
-              Showing {displayedContacts.length} of {filteredContacts.length} contacts
+            <div className="mt-4 text-slate-400 text-sm">
+              Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCount)} of {totalCount} contacts
             </div>
           </>
         )}
