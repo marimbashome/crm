@@ -2,8 +2,6 @@
 // Small semantic chip showing a guest's Airbnb risk signal from guest_airbnb_history.
 // Pure presentational — no data fetching. Works in both mobile and desktop contexts.
 
-import React from 'react'
-
 export type AirbnbRiskSignal =
   | 'HARD_BLOCK'
   | 'HIGH_REVIEW_HOSTILITY'
