@@ -161,14 +161,7 @@ export default function PipelinesPage() {
   }
 
   const handleSaveNewDeal = () => {
-    console.log('Save new deal:', {
-      contact_name: newDeal.contact_name,
-      pipeline_type: newDeal.pipeline_type,
-      stage: newDeal.stage,
-      name: newDeal.name,
-      expected_value: parseFloat(newDeal.expected_value),
-    })
-    // TODO: Add Supabase insert here
+    // TODO: Add Supabase insert here (server-side; do NOT log contact PII to the browser console)
     setNewDeal({
       contact_name: '',
       pipeline_type: activePipeline,
