@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Plus, Building2, Briefcase, ShoppingBag, X } from 'lucide-react'
+import { Building2, Briefcase, ShoppingBag } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,14 +28,6 @@ interface Deal {
   contact_name: string
 }
 
-interface NewDeal {
-  contact_name: string
-  pipeline_type: string
-  stage: string
-  name: string
-  expected_value: string
-}
-
 const pipelineIcons: Record<string, React.ReactNode> = {
   'Owner Acquisition': <Building2 className="w-4 h-4" />,
   'Rumae SaaS': <Briefcase className="w-4 h-4" />,
@@ -48,14 +40,6 @@ export default function PipelinesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activePipeline, setActivePipeline] = useState('Owner Acquisition')
-  const [showNewDealForm, setShowNewDealForm] = useState(false)
-  const [newDeal, setNewDeal] = useState<NewDeal>({
-    contact_name: '',
-    pipeline_type: 'Owner Acquisition',
-    stage: '',
-    name: '',
-    expected_value: '',
-  })
 
   const pipelineTypes = ['Owner Acquisition', 'Rumae SaaS', 'Direct Booking']
 
@@ -158,18 +142,6 @@ export default function PipelinesPage() {
     const diffTime = Math.abs(now.getTime() - created.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays
-  }
-
-  const handleSaveNewDeal = () => {
-    // TODO: Add Supabase insert here (server-side; do NOT log contact PII to the browser console)
-    setNewDeal({
-      contact_name: '',
-      pipeline_type: activePipeline,
-      stage: '',
-      name: '',
-      expected_value: '',
-    })
-    setShowNewDealForm(false)
   }
 
   const currentStages = stages.filter((s) => s.pipeline_type === activePipeline)
@@ -313,147 +285,6 @@ export default function PipelinesPage() {
           )}
         </div>
       </div>
-
-      {/* New Deal FAB */}
-      <button
-        onClick={() => {
-          setNewDeal({
-            ...newDeal,
-            pipeline_type: activePipeline,
-            stage: currentStages.length > 0 ? currentStages[0].stage_name : '',
-          })
-          setShowNewDealForm(true)
-        }}
-        className="fixed bottom-6 right-6 p-4 rounded-full bg-yellow-500/30 text-yellow-200 border border-yellow-500/50 hover:bg-yellow-500/40 transition-colors shadow-lg"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
-
-      {/* New Deal Modal */}
-      {showNewDealForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1a2e] border border-[#2a2a3a] rounded-lg p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">New Deal</h2>
-              <button
-                onClick={() => setShowNewDealForm(false)}
-                className="p-1 hover:bg-[#2a2a3a] rounded transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Contact Name */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Contact Name
-                </label>
-                <input
-                  type="text"
-                  value={newDeal.contact_name}
-                  onChange={(e) =>
-                    setNewDeal({ ...newDeal, contact_name: e.target.value })
-                  }
-                  placeholder="Enter contact name"
-                  className="w-full px-3 py-2 rounded-lg bg-[#12121a] border border-[#2a2a3a] text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 transition-colors"
-                />
-              </div>
-
-              {/* Pipeline Type */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Pipeline Type
-                </label>
-                <select
-                  value={newDeal.pipeline_type}
-                  onChange={(e) =>
-                    setNewDeal({ ...newDeal, pipeline_type: e.target.value })
-                  }
-                  className="w-full px-3 py-2 rounded-lg bg-[#12121a] border border-[#2a2a3a] text-white focus:outline-none focus:border-yellow-500 transition-colors"
-                >
-                  {pipelineTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Stage */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Stage
-                </label>
-                <select
-                  value={newDeal.stage}
-                  onChange={(e) =>
-                    setNewDeal({ ...newDeal, stage: e.target.value })
-                  }
-                  className="w-full px-3 py-2 rounded-lg bg-[#12121a] border border-[#2a2a3a] text-white focus:outline-none focus:border-yellow-500 transition-colors"
-                >
-                  <option value="">Select a stage</option>
-                  {stages
-                    .filter((s) => s.pipeline_type === newDeal.pipeline_type)
-                    .map((stage) => (
-                      <option key={stage.id} value={stage.stage_name}>
-                        {stage.stage_name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              {/* Deal Name */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Deal Name
-                </label>
-                <input
-                  type="text"
-                  value={newDeal.name}
-                  onChange={(e) =>
-                    setNewDeal({ ...newDeal, name: e.target.value })
-                  }
-                  placeholder="Enter deal name"
-                  className="w-full px-3 py-2 rounded-lg bg-[#12121a] border border-[#2a2a3a] text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 transition-colors"
-                />
-              </div>
-
-              {/* Expected Value */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Expected Value (MXN)
-                </label>
-                <input
-                  type="number"
-                  value={newDeal.expected_value}
-                  onChange={(e) =>
-                    setNewDeal({ ...newDeal, expected_value: e.target.value })
-                  }
-                  placeholder="0"
-                  className="w-full px-3 py-2 rounded-lg bg-[#12121a] border border-[#2a2a3a] text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 transition-colors"
-                />
-              </div>
-
-              {/* Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={() => setShowNewDealForm(false)}
-                  className="flex-1 px-4 py-2 rounded-lg bg-[#12121a] border border-[#2a2a3a] text-slate-300 font-medium hover:border-[#3a3a4a] transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveNewDeal}
-                  className="flex-1 px-4 py-2 rounded-lg bg-yellow-500/30 text-yellow-200 border border-yellow-500/50 font-medium hover:bg-yellow-500/40 transition-colors"
-                >
-                  Create Deal
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

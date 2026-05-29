@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Tag, Plus, X } from "lucide-react";
+import { Tag } from "lucide-react";
 import { createBrowserClientInstance } from "../../lib/supabase";
 
 interface TagItem {
@@ -44,10 +44,6 @@ const tagDefs: Omit<TagItem, "count">[] = [
 
 export default function TagsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [showCreate, setShowCreate] = useState(false);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] = useState("#C9A96E");
-  const [newTagCategory, setNewTagCategory] = useState("behavior");
   const [tags, setTags] = useState<TagItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -136,68 +132,7 @@ export default function TagsPage() {
             {loading && " · Cargando..."}
           </p>
         </div>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#C9A96E] text-black rounded-lg font-medium hover:bg-[#B8984D] transition self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          Nuevo Tag
-        </button>
       </div>
-
-      {showCreate && (
-        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-foreground">Crear Tag</h3>
-            <button onClick={() => setShowCreate(false)} className="text-slate-400 hover:text-slate-200">
-              <X size={20} />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm text-slate-400 mb-1">Nombre</label>
-              <input
-                type="text"
-                value={newTagName}
-                onChange={(e) => setNewTagName(e.target.value)}
-                placeholder="Nombre del tag"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:border-[#C9A96E] focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-400 mb-1">Categoría</label>
-              <select
-                value={newTagCategory}
-                onChange={(e) => setNewTagCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:border-[#C9A96E] focus:outline-none"
-              >
-                {Object.entries(categoryLabels).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-slate-400 mb-1">Color</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={newTagColor}
-                  onChange={(e) => setNewTagColor(e.target.value)}
-                  className="h-10 w-10 rounded cursor-pointer bg-transparent border-0"
-                />
-                <span className="text-slate-400 font-mono text-sm">{newTagColor}</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 flex justify-end">
-            <button className="px-6 py-2 bg-[#C9A96E] text-black rounded-lg font-medium hover:bg-[#B8984D] transition">
-              Crear
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="flex gap-2 flex-wrap">
         {categories.map((cat) => (
