@@ -33,9 +33,18 @@ export async function GET(req: NextRequest) {
   }
 
   const contactId = req.nextUrl.searchParams.get('contact_id')
-  if (!contactId) {
+  // UUID guard: reject malformed ids before touching the service-role client.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!contactId || !UUID_RE.test(contactId)) {
     return NextResponse.json({ risk_signal: null, prior_stays: null, is_blocked_on_airbnb: false })
   }
+
+  // Tenancy note: this route reads via the service-role client without an org_id
+  // filter by design. CRM sign-in is gated to a 2-email allowlist (lib/auth.ts
+  // ALLOWED_EMAILS) — both Marimbas staff with full access to all data, so there
+  // is no second tenant whose contact_id could be probed (no cross-org exposure).
+  // If CRM ever onboards external/multi-org users, scope this lookup to the
+  // caller's org_id.
 
   try {
     const sv = createServiceRoleClient()
