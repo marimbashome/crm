@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClientInstance } from '@/lib/supabase'
 import {
   ArrowLeft,
   Calendar,
@@ -18,10 +18,7 @@ import {
 } from 'lucide-react'
 import { AirbnbHistoryBadge, type AirbnbHistoryData } from '@/components/AirbnbHistoryBadge'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = createBrowserClientInstance()
 
 interface CrmContact {
   id: string
