@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createBrowserClientInstance } from '@/lib/supabase'
+import type { LucideIcon } from 'lucide-react'
 import {
   ArrowLeft,
   Calendar,
@@ -84,7 +85,7 @@ const typeColors: Record<string, string> = {
   B2B: 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/30',
 }
 
-const interactionIcons: Record<string, any> = {
+const interactionIcons: Record<string, LucideIcon> = {
   reservation: Calendar,
   check_in: LogIn,
   minibar: ShoppingCart,

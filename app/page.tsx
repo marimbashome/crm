@@ -1,4 +1,10 @@
 import { createClient } from '../lib/supabase';
+import {
+  formatDashboardCurrency,
+  formatTimeAgo,
+  sumLifetimeValue,
+  type RecentActivity,
+} from './dashboard-helpers';
 
 export const dynamic = 'force-dynamic'; // fetch fresh data on every request, no ISR writes
 
@@ -23,7 +29,7 @@ async function getDashboardData() {
     supabase.from('crm_activity_log').select('id, type, date, contact_name, contact_type, subject').order('date', { ascending: false }).limit(10),
   ]);
 
-  const totalLTV = ltvData?.reduce((sum, r) => sum + (Number(r.lifetime_value) || 0), 0) || 0;
+  const totalLTV = sumLifetimeValue(ltvData);
 
   return {
     totalContacts: totalContacts || 0,
@@ -34,30 +40,6 @@ async function getDashboardData() {
     contactableEmail: contactableEmail || 0,
     recentActivity: recentActivity || [],
   };
-}
-
-function formatCurrency(value: number): string {
-  if (value >= 1_000_000) {
-    return `$${(value / 1_000_000).toFixed(2)}M MXN`;
-  }
-  if (value >= 1_000) {
-    return `$${(value / 1_000).toFixed(0)}K MXN`;
-  }
-  return `$${value.toFixed(0)} MXN`;
-}
-
-function formatTimeAgo(dateStr: string): string {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHrs = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHrs / 24);
-
-  if (diffMins < 60) return `hace ${diffMins}m`;
-  if (diffHrs < 24) return `hace ${diffHrs}h`;
-  if (diffDays < 7) return `hace ${diffDays}d`;
-  return date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
 }
 
 const activityIcons: Record<string, string> = {
@@ -76,7 +58,7 @@ export default async function Dashboard() {
 
   const kpis = [
     { label: "Total Contacts", value: data.totalContacts.toLocaleString(), icon: "📊" },
-    { label: "Total LTV", value: formatCurrency(data.totalLTV), icon: "💰" },
+    { label: "Total LTV", value: formatDashboardCurrency(data.totalLTV), icon: "💰" },
     { label: "Interactions", value: data.totalInteractions.toLocaleString(), icon: "💬" },
     { label: "VIP Guests", value: data.vipCount.toLocaleString(), icon: "👑" },
     { label: "Frequent", value: data.frequentCount.toLocaleString(), icon: "⭐" },
@@ -117,7 +99,7 @@ export default async function Dashboard() {
           <p className="text-slate-400">No hay actividad reciente</p>
         ) : (
           <div className="space-y-3">
-            {data.recentActivity.map((activity: any) => (
+            {(data.recentActivity as RecentActivity[]).map((activity) => (
               <div
                 key={activity.id}
                 className="flex items-center gap-4 p-3 rounded-lg bg-slate-900/50 hover:bg-slate-900 transition"

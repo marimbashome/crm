@@ -3,27 +3,19 @@
 import { useEffect, useState } from 'react'
 import { Building2, Briefcase, ShoppingBag } from 'lucide-react'
 import { createBrowserClientInstance } from '@/lib/supabase'
+import {
+  formatPipelineCurrency,
+  getDaysInStage,
+  getDealsForPipeline,
+  getDealsForStage,
+  getStagesForPipeline,
+  mapPipelineDeal,
+  type Deal,
+  type PipelineDealRow,
+  type PipelineStage,
+} from './helpers'
 
 const supabase = createBrowserClientInstance()
-
-interface PipelineStage {
-  id: string
-  pipeline_type: string
-  stage_name: string
-  stage_order: number
-  color: string
-}
-
-interface Deal {
-  id: string
-  name: string
-  pipeline_type: string
-  stage: string
-  expected_value: number
-  probability: number
-  created_at: string
-  contact_name: string
-}
 
 const pipelineIcons: Record<string, React.ReactNode> = {
   'Owner Acquisition': <Building2 className="w-4 h-4" />,
@@ -95,19 +87,7 @@ export default function PipelinesPage() {
           setError(`Failed to load deals: ${fetchError.message}`)
           setDeals([])
         } else {
-          const formattedDeals = (data || []).map((deal: any) => ({
-            id: deal.id,
-            name: deal.name,
-            pipeline_type: deal.pipeline_type,
-            stage: deal.stage,
-            expected_value: deal.expected_value,
-            probability: deal.probability,
-            created_at: deal.created_at,
-            contact_name:
-              deal.crm_contacts?.first_name && deal.crm_contacts?.last_name
-                ? `${deal.crm_contacts.first_name} ${deal.crm_contacts.last_name}`
-                : 'Unknown',
-          }))
+          const formattedDeals = ((data || []) as PipelineDealRow[]).map(mapPipelineDeal)
           setDeals(formattedDeals)
         }
       } catch (err) {
@@ -124,29 +104,8 @@ export default function PipelinesPage() {
     }
   }, [stages])
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-
-  const getDaysInStage = (createdAt: string): number => {
-    const created = new Date(createdAt)
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - created.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays
-  }
-
-  const currentStages = stages.filter((s) => s.pipeline_type === activePipeline)
-  const currentDeals = deals.filter((d) => d.pipeline_type === activePipeline)
-
-  const getDealsForStage = (stageName: string) => {
-    return currentDeals.filter((d) => d.stage === stageName)
-  }
+  const currentStages = getStagesForPipeline(stages, activePipeline)
+  const currentDeals = getDealsForPipeline(deals, activePipeline)
 
   return (
     <div className="min-h-screen bg-[#0f0f1a] text-white">
@@ -204,7 +163,7 @@ export default function PipelinesPage() {
             <div className="overflow-x-auto pb-6">
               <div className="flex gap-6 min-w-max">
                 {currentStages.map((stage) => {
-                  const stageDeals = getDealsForStage(stage.stage_name)
+                  const stageDeals = getDealsForStage(currentDeals, stage.stage_name)
                   return (
                     <div
                       key={stage.id}
@@ -254,7 +213,7 @@ export default function PipelinesPage() {
                                 <div className="flex justify-between items-center text-xs">
                                   <span className="text-slate-500">Value</span>
                                   <span className="font-semibold text-yellow-400">
-                                    {formatCurrency(deal.expected_value)}
+                                    {formatPipelineCurrency(deal.expected_value)}
                                   </span>
                                 </div>
                                 <div className="flex justify-between items-center text-xs">

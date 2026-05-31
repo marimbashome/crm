@@ -3,10 +3,16 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClientInstance } from '@/lib/supabase'
+import {
+  formatContactCurrency,
+  formatContactDate,
+  getResultsRange,
+  getTotalPages,
+  normalizeContactTypeFilter,
+  PAGE_SIZE,
+} from './helpers'
 
 const supabase = createBrowserClientInstance()
-
-const PAGE_SIZE = 50
 
 interface CrmContact {
   id: string
@@ -123,26 +129,15 @@ export default function ContactsPage() {
     fetchContacts()
   }, [page, selectedType, selectedTier, debouncedSearch])
 
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+  const totalPages = getTotalPages(totalCount)
   const displayedContacts = contacts
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
+    return formatContactCurrency(value)
   }
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return '—'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
+    return formatContactDate(dateString)
   }
 
   const getTierBadge = (tier?: string) => {
@@ -193,9 +188,9 @@ export default function ContactsPage() {
             {['All', 'Guests', 'Leads', 'Owners', 'B2B'].map((type) => (
               <button
                 key={type}
-                onClick={() => handleTypeChange(type === 'All' ? 'All' : type.slice(0, -1))}
+                onClick={() => handleTypeChange(normalizeContactTypeFilter(type))}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedType === (type === 'All' ? 'All' : type.slice(0, -1))
+                  selectedType === normalizeContactTypeFilter(type)
                     ? 'bg-yellow-500/30 text-yellow-200 border border-yellow-500/50'
                     : 'bg-[#1a1a2e] text-slate-300 border border-[#2a2a3a] hover:border-[#3a3a4a]'
                 }`}
@@ -370,7 +365,7 @@ export default function ContactsPage() {
 
             {/* Results Summary */}
             <div className="mt-4 text-slate-400 text-sm">
-              Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCount)} of {totalCount} contacts
+              Showing {getResultsRange(page, totalCount)} of {totalCount} contacts
             </div>
           </>
         )}
