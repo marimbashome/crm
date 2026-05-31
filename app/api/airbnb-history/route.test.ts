@@ -55,7 +55,7 @@ describe('GET /api/airbnb-history', () => {
     getTokenMock.mockResolvedValue(null)
 
     const { GET } = await import('@/app/api/airbnb-history/route')
-    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=1'))
+    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=a0000000-0000-4000-8000-000000000001'))
 
     expect(response.status).toBe(401)
     await expect(response.json()).resolves.toEqual({ error: 'Unauthorized' })
@@ -85,7 +85,7 @@ describe('GET /api/airbnb-history', () => {
     )
 
     const { GET } = await import('@/app/api/airbnb-history/route')
-    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=1'))
+    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=a0000000-0000-4000-8000-000000000001'))
 
     await expect(response.json()).resolves.toEqual({
       risk_signal: null,
@@ -108,7 +108,7 @@ describe('GET /api/airbnb-history', () => {
     )
 
     const { GET } = await import('@/app/api/airbnb-history/route')
-    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=1'))
+    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=a0000000-0000-4000-8000-000000000001'))
 
     expect(createClientMock).toHaveBeenCalledWith(
       'https://example.supabase.co',
@@ -131,7 +131,7 @@ describe('GET /api/airbnb-history', () => {
     })
 
     const { GET } = await import('@/app/api/airbnb-history/route')
-    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=1'))
+    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=a0000000-0000-4000-8000-000000000001'))
 
     await expect(response.json()).resolves.toEqual({
       risk_signal: null,
