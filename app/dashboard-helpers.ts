@@ -1,3 +1,5 @@
+import { formatCdmxDate } from '@/lib/cdmx-date'
+
 export interface LifetimeValueRow {
   lifetime_value: number | string | null
 }
@@ -35,5 +37,5 @@ export function formatTimeAgo(dateStr: string, now = new Date()): string {
   if (diffMins < 60) return `hace ${diffMins}m`
   if (diffHrs < 24) return `hace ${diffHrs}h`
   if (diffDays < 7) return `hace ${diffDays}d`
-  return date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })
+  return formatCdmxDate(dateStr, { month: 'short', day: 'numeric' })
 }

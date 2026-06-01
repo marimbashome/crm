@@ -1,3 +1,5 @@
+import { formatCdmxDate } from '@/lib/cdmx-date'
+
 export const PAGE_SIZE = 50
 
 export function formatContactCurrency(value: number): string {
@@ -12,7 +14,7 @@ export function formatContactCurrency(value: number): string {
 export function formatContactDate(dateString?: string): string {
   if (!dateString) return '—'
 
-  return new Date(dateString).toLocaleDateString('es-MX', {
+  return formatCdmxDate(dateString, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

@@ -82,8 +82,7 @@ export default function TagsPage() {
         supabase.from('crm_contacts').select('*', { count: 'exact', head: true }).not('referred_by', 'is', null),
       ]);
 
-      // Property counts by channel_acquired or source patterns
-      // For now, derive from total proportions (Condesa ~14.6%, rest Chiapas)
+      // TODO: derive from DB when crm_contacts has reliable zone data; today this is an estimate.
       const totalQuery = await supabase.from('crm_contacts').select('*', { count: 'exact', head: true });
       const total = totalQuery.count || 0;
       const condesa = Math.round(total * 0.146);

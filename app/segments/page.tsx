@@ -120,7 +120,7 @@ export default function SegmentsPage() {
         supabase.from('crm_contacts').select('*', { count: 'exact', head: true }).gt('minibar_spend', 0),
       ]);
 
-      // For CDMX/Chiapas we derive from total minus others
+      // TODO: derive from DB when crm_contacts has reliable zone data; today this is an estimate.
       const cdmxEstimate = Math.round((total || 0) * 0.146); // ~14.6% based on Condesa 4 props / 22 total
       const chiapasEstimate = (total || 0) - cdmxEstimate;
 
