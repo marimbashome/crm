@@ -18,6 +18,7 @@ import {
   StickyNote,
 } from 'lucide-react'
 import { AirbnbHistoryBadge, type AirbnbHistoryData } from '@/components/AirbnbHistoryBadge'
+import { formatCdmxDate } from '@/lib/cdmx-date'
 
 const supabase = createBrowserClientInstance()
 
@@ -190,8 +191,7 @@ export default function ContactDetailPage() {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '—'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-MX', {
+    return formatCdmxDate(dateString, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -199,11 +199,12 @@ export default function ContactDetailPage() {
   }
 
   const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-MX', {
+    const currentYear = formatCdmxDate(new Date().toISOString(), { year: 'numeric' })
+    const interactionYear = formatCdmxDate(dateString, { year: 'numeric' })
+    return formatCdmxDate(dateString, {
       month: 'short',
       day: 'numeric',
-      year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+      year: interactionYear !== currentYear ? 'numeric' : undefined,
     })
   }
 

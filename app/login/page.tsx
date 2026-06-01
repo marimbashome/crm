@@ -1,5 +1,6 @@
 "use client";
 
+import { getSafeCallbackUrl } from "@/lib/callback-url";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -7,6 +8,10 @@ import { Suspense } from "react";
 function LoginContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const callbackUrl = getSafeCallbackUrl(
+    searchParams.get("callbackUrl"),
+    typeof window === "undefined" ? "" : window.location.origin
+  );
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
@@ -26,7 +31,7 @@ function LoginContent() {
         )}
 
         <button
-          onClick={() => signIn("google", { callbackUrl: "/" })}
+          onClick={() => signIn("google", { callbackUrl })}
           className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 px-6 rounded-xl hover:bg-gray-100 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">

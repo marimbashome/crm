@@ -1,3 +1,5 @@
+import { diffCdmxCalendarDays } from '@/lib/cdmx-date'
+
 export interface PipelineStage {
   id: string
   pipeline_type: string
@@ -30,11 +32,11 @@ export interface PipelineDealRow {
   expected_value: number
   probability: number
   created_at: string
-  crm_contacts?: DealContactRow | DealContactRow[] | null
+  contact?: DealContactRow | DealContactRow[] | null
 }
 
 export function mapPipelineDeal(row: PipelineDealRow): Deal {
-  const contactRow = Array.isArray(row.crm_contacts) ? row.crm_contacts[0] : row.crm_contacts
+  const contactRow = Array.isArray(row.contact) ? row.contact[0] : row.contact
   const firstName = contactRow?.first_name?.trim()
   const lastName = contactRow?.last_name?.trim()
   const contactName = firstName && lastName ? `${firstName} ${lastName}` : 'Unknown'
@@ -61,9 +63,7 @@ export function formatPipelineCurrency(value: number): string {
 }
 
 export function getDaysInStage(createdAt: string, now = new Date()): number {
-  const created = new Date(createdAt)
-  const diffTime = Math.abs(now.getTime() - created.getTime())
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return diffCdmxCalendarDays(createdAt, now)
 }
 
 export function getStagesForPipeline(

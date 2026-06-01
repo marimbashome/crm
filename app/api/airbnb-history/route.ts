@@ -11,6 +11,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getToken } from 'next-auth/jwt'
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function isNoRowsError(error: unknown): boolean {
+  return Boolean(
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    error.code === 'PGRST116'
+  )
+}
+
+function emptyHistoryPayload() {
+  return {
+    risk_signal: null,
+    prior_stays: null,
+    is_blocked_on_airbnb: false,
+  }
+}
+
+function upstreamError(stage: string, error: unknown) {
+  console.error(`[airbnb-history] ${stage} failed`, error)
+  return NextResponse.json({ error: 'Failed to load Airbnb history' }, { status: 502 })
+}
+
 function createServiceRoleClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -33,10 +57,8 @@ export async function GET(req: NextRequest) {
   }
 
   const contactId = req.nextUrl.searchParams.get('contact_id')
-  // UUID guard: reject malformed ids before touching the service-role client.
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   if (!contactId || !UUID_RE.test(contactId)) {
-    return NextResponse.json({ risk_signal: null, prior_stays: null, is_blocked_on_airbnb: false })
+    return NextResponse.json({ error: 'Invalid contact_id' }, { status: 400 })
   }
 
   // Tenancy note: this route reads via the service-role client without an org_id
@@ -56,8 +78,14 @@ export async function GET(req: NextRequest) {
       .eq('id', contactId)
       .single()
 
-    if (contactErr || !contact?.guest_id) {
-      return NextResponse.json({ risk_signal: null, prior_stays: null, is_blocked_on_airbnb: false })
+    if (contactErr) {
+      return isNoRowsError(contactErr)
+        ? NextResponse.json(emptyHistoryPayload())
+        : upstreamError('contact lookup', contactErr)
+    }
+
+    if (!contact?.guest_id) {
+      return NextResponse.json(emptyHistoryPayload())
     }
 
     // Step 2: get airbnb_user_id from guests
@@ -67,8 +95,14 @@ export async function GET(req: NextRequest) {
       .eq('id', contact.guest_id)
       .single()
 
-    if (guestErr || !guest?.airbnb_user_id) {
-      return NextResponse.json({ risk_signal: null, prior_stays: null, is_blocked_on_airbnb: false })
+    if (guestErr) {
+      return isNoRowsError(guestErr)
+        ? NextResponse.json(emptyHistoryPayload())
+        : upstreamError('guest lookup', guestErr)
+    }
+
+    if (!guest?.airbnb_user_id) {
+      return NextResponse.json(emptyHistoryPayload())
     }
 
     // Step 3: lookup guest_airbnb_history
@@ -78,8 +112,14 @@ export async function GET(req: NextRequest) {
       .eq('airbnb_user_id', guest.airbnb_user_id)
       .single()
 
-    if (histErr || !history) {
-      return NextResponse.json({ risk_signal: null, prior_stays: null, is_blocked_on_airbnb: false })
+    if (histErr) {
+      return isNoRowsError(histErr)
+        ? NextResponse.json(emptyHistoryPayload())
+        : upstreamError('history lookup', histErr)
+    }
+
+    if (!history) {
+      return NextResponse.json(emptyHistoryPayload())
     }
 
     return NextResponse.json({
@@ -89,6 +129,6 @@ export async function GET(req: NextRequest) {
     })
   } catch (err) {
     console.error('[airbnb-history] unexpected error', err)
-    return NextResponse.json({ risk_signal: null, prior_stays: null, is_blocked_on_airbnb: false })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -62,18 +62,26 @@ describe('GET /api/airbnb-history', () => {
     expect(createClientMock).not.toHaveBeenCalled()
   })
 
-  it('returns an empty payload when contact_id is missing', async () => {
+  it('returns 400 when contact_id is missing', async () => {
     getTokenMock.mockResolvedValue({ sub: 'user-1' })
 
     const { GET } = await import('@/app/api/airbnb-history/route')
     const response = await GET(new NextRequest('https://crm.test/api/airbnb-history'))
 
-    expect(response.status).toBe(200)
-    await expect(response.json()).resolves.toEqual({
-      risk_signal: null,
-      prior_stays: null,
-      is_blocked_on_airbnb: false,
-    })
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({ error: 'Invalid contact_id' })
+    expect(createClientMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 400 when contact_id is not a UUID', async () => {
+    getTokenMock.mockResolvedValue({ sub: 'user-1' })
+
+    const { GET } = await import('@/app/api/airbnb-history/route')
+    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=not-a-uuid'))
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({ error: 'Invalid contact_id' })
+    expect(createClientMock).not.toHaveBeenCalled()
   })
 
   it('returns an empty payload when the contact has no guest_id', async () => {
@@ -124,7 +132,22 @@ describe('GET /api/airbnb-history', () => {
     })
   })
 
-  it('falls back to an empty payload when the service-role client throws', async () => {
+  it('returns 502 when a lookup fails operationally', async () => {
+    getTokenMock.mockResolvedValue({ sub: 'user-1' })
+    createClientMock.mockReturnValue(
+      createSupabaseMock({
+        crm_contacts: { data: null, error: { code: 'XX000', message: 'db down' } },
+      })
+    )
+
+    const { GET } = await import('@/app/api/airbnb-history/route')
+    const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=a0000000-0000-4000-8000-000000000001'))
+
+    expect(response.status).toBe(502)
+    await expect(response.json()).resolves.toEqual({ error: 'Failed to load Airbnb history' })
+  })
+
+  it('returns 500 when the service-role client throws', async () => {
     getTokenMock.mockResolvedValue({ sub: 'user-1' })
     createClientMock.mockImplementation(() => {
       throw new Error('boom')
@@ -133,10 +156,7 @@ describe('GET /api/airbnb-history', () => {
     const { GET } = await import('@/app/api/airbnb-history/route')
     const response = await GET(new NextRequest('https://crm.test/api/airbnb-history?contact_id=a0000000-0000-4000-8000-000000000001'))
 
-    await expect(response.json()).resolves.toEqual({
-      risk_signal: null,
-      prior_stays: null,
-      is_blocked_on_airbnb: false,
-    })
+    expect(response.status).toBe(500)
+    await expect(response.json()).resolves.toEqual({ error: 'Internal server error' })
   })
 })

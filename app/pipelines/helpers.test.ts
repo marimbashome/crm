@@ -61,7 +61,7 @@ describe('pipeline helpers', () => {
         expected_value: 10000,
         probability: 80,
         created_at: '2026-05-28T12:00:00.000Z',
-        crm_contacts: { first_name: ' Ana ', last_name: ' Perez ' },
+        contact: { first_name: ' Ana ', last_name: ' Perez ' },
       })
     ).toMatchObject({
       id: 'd1',
@@ -79,7 +79,7 @@ describe('pipeline helpers', () => {
         expected_value: 5000,
         probability: 100,
         created_at: '2026-05-20T12:00:00.000Z',
-        crm_contacts: { first_name: 'Ana', last_name: null },
+        contact: { first_name: 'Ana', last_name: null },
       }).contact_name
     ).toBe('Unknown')
   })
@@ -91,6 +91,11 @@ describe('pipeline helpers', () => {
   it('calculates whole days in stage rounding partial days up', () => {
     const now = new Date('2026-05-31T12:00:00.000Z')
     expect(getDaysInStage('2026-05-30T18:00:00.000Z', now)).toBe(1)
+  })
+
+  it('keeps future stage dates negative instead of masking them', () => {
+    const now = new Date('2026-05-31T12:00:00.000Z')
+    expect(getDaysInStage('2026-05-31T18:00:00.000Z', now)).toBe(-1)
   })
 
   it('filters stages by active pipeline', () => {

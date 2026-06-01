@@ -77,7 +77,7 @@ export default function PipelinesPage() {
             expected_value,
             probability,
             created_at,
-            crm_contacts(first_name, last_name)
+            contact:crm_contacts!contact_id(first_name, last_name)
           `
           )
           .eq('outcome', 'open')
